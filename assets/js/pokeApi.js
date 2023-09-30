@@ -1,5 +1,21 @@
 const pokeApi = {}
 
+function convertPokeStatus(jsonBody) {
+    
+    const pokemon = convertPokeApiDetailToPokemon(jsonBody)
+    const names = jsonBody.stats.map((stat) => stat.stat.name);
+    const values = jsonBody.stats.map((stat) => stat.base_stat);
+    const estatisticas = []
+
+    for (let i = 0; i <  names.length; i++){
+        estatisticas[i] = [names[i], values[i]]        
+    }
+
+    pokemon.stats = estatisticas;
+    
+    return pokemon
+}
+
 function convertPokeApiDetailToPokemon(pokeDetail) {
     const pokemon = new Pokemon()
     pokemon.number = pokeDetail.id
@@ -18,6 +34,7 @@ function convertPokeApiDetailToPokemon(pokeDetail) {
 
 pokeApi.getPokemonDetail = (pokemon) => {
     return fetch(pokemon.url)
+
         .then((response) => response.json())
         .then(convertPokeApiDetailToPokemon)
 }
@@ -31,4 +48,13 @@ pokeApi.getPokemons = (offset = 0, limit = 5) => {
         .then((pokemons) => pokemons.map(pokeApi.getPokemonDetail))
         .then((detailRequests) => Promise.all(detailRequests))
         .then((pokemonsDetails) => pokemonsDetails)
+}
+
+pokeApi.getPokemon = (id) => {
+    const url = `https://pokeapi.co/api/v2/pokemon/${id}`
+
+    return fetch(url)
+        .then((response) => response.json())
+        .then((jsonBody) => convertPokeStatus(jsonBody))
+
 }
